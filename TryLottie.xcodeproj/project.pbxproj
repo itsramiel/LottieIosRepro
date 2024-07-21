@@ -7,15 +7,20 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		6FECA5ABD464C149D36B0094 /* Pods_TryLottie.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5FE4F400D9D416A04A47564C /* Pods_TryLottie.framework */; };
 		9B21DC582C4DAEDC00E2C520 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B21DC572C4DAEDC00E2C520 /* AppDelegate.swift */; };
 		9B21DC5A2C4DAEDC00E2C520 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B21DC592C4DAEDC00E2C520 /* SceneDelegate.swift */; };
 		9B21DC5C2C4DAEDC00E2C520 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B21DC5B2C4DAEDC00E2C520 /* ViewController.swift */; };
 		9B21DC5F2C4DAEDC00E2C520 /* Base in Resources */ = {isa = PBXBuildFile; fileRef = 9B21DC5E2C4DAEDC00E2C520 /* Base */; };
 		9B21DC612C4DAEDD00E2C520 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 9B21DC602C4DAEDD00E2C520 /* Assets.xcassets */; };
 		9B21DC642C4DAEDD00E2C520 /* Base in Resources */ = {isa = PBXBuildFile; fileRef = 9B21DC632C4DAEDD00E2C520 /* Base */; };
+		9B21DC702C4DB18A00E2C520 /* heart.json in Resources */ = {isa = PBXBuildFile; fileRef = 9B21DC6F2C4DB18A00E2C520 /* heart.json */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		349BF9870616D53376C12609 /* Pods-TryLottie.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-TryLottie.debug.xcconfig"; path = "Target Support Files/Pods-TryLottie/Pods-TryLottie.debug.xcconfig"; sourceTree = "<group>"; };
+		5FE4F400D9D416A04A47564C /* Pods_TryLottie.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_TryLottie.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		7B1F8CBC09378FB06B918923 /* Pods-TryLottie.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-TryLottie.release.xcconfig"; path = "Target Support Files/Pods-TryLottie/Pods-TryLottie.release.xcconfig"; sourceTree = "<group>"; };
 		9B21DC542C4DAEDC00E2C520 /* TryLottie.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TryLottie.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		9B21DC572C4DAEDC00E2C520 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		9B21DC592C4DAEDC00E2C520 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -24,6 +29,7 @@
 		9B21DC602C4DAEDD00E2C520 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		9B21DC632C4DAEDD00E2C520 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		9B21DC652C4DAEDD00E2C520 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		9B21DC6F2C4DB18A00E2C520 /* heart.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = heart.json; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -31,17 +37,37 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				6FECA5ABD464C149D36B0094 /* Pods_TryLottie.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		50478B75D22AC63EF5EC2554 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				5FE4F400D9D416A04A47564C /* Pods_TryLottie.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		8CB1C3ADF054B44A8E7C0F95 /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				349BF9870616D53376C12609 /* Pods-TryLottie.debug.xcconfig */,
+				7B1F8CBC09378FB06B918923 /* Pods-TryLottie.release.xcconfig */,
+			);
+			path = Pods;
+			sourceTree = "<group>";
+		};
 		9B21DC4B2C4DAEDC00E2C520 = {
 			isa = PBXGroup;
 			children = (
 				9B21DC562C4DAEDC00E2C520 /* TryLottie */,
 				9B21DC552C4DAEDC00E2C520 /* Products */,
+				8CB1C3ADF054B44A8E7C0F95 /* Pods */,
+				50478B75D22AC63EF5EC2554 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -58,6 +84,7 @@
 			children = (
 				9B21DC572C4DAEDC00E2C520 /* AppDelegate.swift */,
 				9B21DC592C4DAEDC00E2C520 /* SceneDelegate.swift */,
+				9B21DC6F2C4DB18A00E2C520 /* heart.json */,
 				9B21DC5B2C4DAEDC00E2C520 /* ViewController.swift */,
 				9B21DC5D2C4DAEDC00E2C520 /* Main.storyboard */,
 				9B21DC602C4DAEDD00E2C520 /* Assets.xcassets */,
@@ -74,9 +101,11 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 9B21DC682C4DAEDD00E2C520 /* Build configuration list for PBXNativeTarget "TryLottie" */;
 			buildPhases = (
+				5A28879612C51C17120E2234 /* [CP] Check Pods Manifest.lock */,
 				9B21DC502C4DAEDC00E2C520 /* Sources */,
 				9B21DC512C4DAEDC00E2C520 /* Frameworks */,
 				9B21DC522C4DAEDC00E2C520 /* Resources */,
+				6A53F0A9D1CDA8FCBA5B7DAE /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -125,6 +154,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9B21DC702C4DB18A00E2C520 /* heart.json in Resources */,
 				9B21DC612C4DAEDD00E2C520 /* Assets.xcassets in Resources */,
 				9B21DC642C4DAEDD00E2C520 /* Base in Resources */,
 				9B21DC5F2C4DAEDC00E2C520 /* Base in Resources */,
@@ -132,6 +162,48 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		5A28879612C51C17120E2234 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-TryLottie-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		6A53F0A9D1CDA8FCBA5B7DAE /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-TryLottie/Pods-TryLottie-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-TryLottie/Pods-TryLottie-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-TryLottie/Pods-TryLottie-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		9B21DC502C4DAEDC00E2C520 /* Sources */ = {
@@ -203,7 +275,7 @@
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
-				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
@@ -266,7 +338,7 @@
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
@@ -287,6 +359,7 @@
 		};
 		9B21DC692C4DAEDD00E2C520 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 349BF9870616D53376C12609 /* Pods-TryLottie.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -315,6 +388,7 @@
 		};
 		9B21DC6A2C4DAEDD00E2C520 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 7B1F8CBC09378FB06B918923 /* Pods-TryLottie.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
