@@ -5,14 +5,7 @@
 //  Created by Brandon Withrow on 1/9/19.
 //
 
-// MARK: - TextRangeUnit
-
-enum TextRangeUnit: Int, RawRepresentable, Codable {
-  case percentage = 1
-  case index = 2
-}
-
-// MARK: - TextAnimator
+import Foundation
 
 final class TextAnimator: Codable, DictionaryInitializable {
 
@@ -21,7 +14,6 @@ final class TextAnimator: Codable, DictionaryInitializable {
   required init(from decoder: Decoder) throws {
     let container = try decoder.container(keyedBy: TextAnimator.CodingKeys.self)
     name = try container.decodeIfPresent(String.self, forKey: .name) ?? ""
-
     let animatorContainer = try container.nestedContainer(keyedBy: TextAnimatorKeys.self, forKey: .textAnimator)
     fillColor = try animatorContainer.decodeIfPresent(KeyframeGroup<LottieColor>.self, forKey: .fillColor)
     strokeColor = try animatorContainer.decodeIfPresent(KeyframeGroup<LottieColor>.self, forKey: .strokeColor)
@@ -32,26 +24,12 @@ final class TextAnimator: Codable, DictionaryInitializable {
     scale = try animatorContainer.decodeIfPresent(KeyframeGroup<LottieVector3D>.self, forKey: .scale)
     skew = try animatorContainer.decodeIfPresent(KeyframeGroup<LottieVector1D>.self, forKey: .skew)
     skewAxis = try animatorContainer.decodeIfPresent(KeyframeGroup<LottieVector1D>.self, forKey: .skewAxis)
-    rotationX = try animatorContainer.decodeIfPresent(KeyframeGroup<LottieVector1D>.self, forKey: .rotationX)
-    rotationY = try animatorContainer.decodeIfPresent(KeyframeGroup<LottieVector1D>.self, forKey: .rotationY)
-    if let rotation = try animatorContainer.decodeIfPresent(KeyframeGroup<LottieVector1D>.self, forKey: .rotation) {
-      rotationZ = rotation
-    } else if let rotation = try animatorContainer.decodeIfPresent(KeyframeGroup<LottieVector1D>.self, forKey: .rotationZ) {
-      rotationZ = rotation
-    } else {
-      rotationZ = nil
-    }
+    rotation = try animatorContainer.decodeIfPresent(KeyframeGroup<LottieVector1D>.self, forKey: .rotation)
     opacity = try animatorContainer.decodeIfPresent(KeyframeGroup<LottieVector1D>.self, forKey: .opacity)
-
-    let selectorContainer = try? container.nestedContainer(keyedBy: TextSelectorKeys.self, forKey: .textSelector)
-    start = try? selectorContainer?.decodeIfPresent(KeyframeGroup<LottieVector1D>.self, forKey: .start)
-    end = try? selectorContainer?.decodeIfPresent(KeyframeGroup<LottieVector1D>.self, forKey: .end)
-    textRangeUnit = try? selectorContainer?.decodeIfPresent(TextRangeUnit.self, forKey: .textRangeUnits)
   }
 
   init(dictionary: [String: Any]) throws {
     name = (try? dictionary.value(for: CodingKeys.name)) ?? ""
-
     let animatorDictionary: [String: Any] = try dictionary.value(for: CodingKeys.textAnimator)
     if let fillColorDictionary = animatorDictionary[TextAnimatorKeys.fillColor.rawValue] as? [String: Any] {
       fillColor = try? KeyframeGroup<LottieColor>(dictionary: fillColorDictionary)
@@ -98,50 +76,15 @@ final class TextAnimator: Codable, DictionaryInitializable {
     } else {
       skewAxis = nil
     }
-    if let rotationDictionary = animatorDictionary[TextAnimatorKeys.rotationX.rawValue] as? [String: Any] {
-      rotationX = try? KeyframeGroup<LottieVector1D>(dictionary: rotationDictionary)
-    } else {
-      rotationX = nil
-    }
-
-    if let rotationDictionary = animatorDictionary[TextAnimatorKeys.rotationY.rawValue] as? [String: Any] {
-      rotationY = try? KeyframeGroup<LottieVector1D>(dictionary: rotationDictionary)
-    } else {
-      rotationY = nil
-    }
-
     if let rotationDictionary = animatorDictionary[TextAnimatorKeys.rotation.rawValue] as? [String: Any] {
-      rotationZ = try? KeyframeGroup<LottieVector1D>(dictionary: rotationDictionary)
-    } else if let rotationDictionary = animatorDictionary[TextAnimatorKeys.rotationZ.rawValue] as? [String: Any] {
-      rotationZ = try? KeyframeGroup<LottieVector1D>(dictionary: rotationDictionary)
+      rotation = try? KeyframeGroup<LottieVector1D>(dictionary: rotationDictionary)
     } else {
-      rotationZ = nil
+      rotation = nil
     }
-
     if let opacityDictionary = animatorDictionary[TextAnimatorKeys.opacity.rawValue] as? [String: Any] {
       opacity = try KeyframeGroup<LottieVector1D>(dictionary: opacityDictionary)
     } else {
       opacity = nil
-    }
-
-    let selectorDictionary: [String: Any] = try dictionary.value(for: CodingKeys.textSelector)
-
-    if let startDictionary = selectorDictionary[TextSelectorKeys.start.rawValue] as? [String: Any] {
-      start = try KeyframeGroup<LottieVector1D>(dictionary: startDictionary)
-    } else {
-      start = nil
-    }
-
-    if let endDictionary = selectorDictionary[TextSelectorKeys.end.rawValue] as? [String: Any] {
-      end = try KeyframeGroup<LottieVector1D>(dictionary: endDictionary)
-    } else {
-      end = nil
-    }
-
-    if let textRangeUnitValue = selectorDictionary[TextSelectorKeys.textRangeUnits.rawValue] as? Int {
-      textRangeUnit = TextRangeUnit(rawValue: textRangeUnitValue)
-    } else {
-      textRangeUnit = nil
     }
   }
 
@@ -164,14 +107,8 @@ final class TextAnimator: Codable, DictionaryInitializable {
   /// Skew Axis
   let skewAxis: KeyframeGroup<LottieVector1D>?
 
-  /// Rotation on X axis
-  let rotationX: KeyframeGroup<LottieVector1D>?
-
-  /// Rotation on Y axis
-  let rotationY: KeyframeGroup<LottieVector1D>?
-
-  /// Rotation on Z axis
-  let rotationZ: KeyframeGroup<LottieVector1D>?
+  /// Rotation
+  let rotation: KeyframeGroup<LottieVector1D>?
 
   /// Opacity
   let opacity: KeyframeGroup<LottieVector1D>?
@@ -188,15 +125,6 @@ final class TextAnimator: Codable, DictionaryInitializable {
   /// Tracking
   let tracking: KeyframeGroup<LottieVector1D>?
 
-  /// Start
-  let start: KeyframeGroup<LottieVector1D>?
-
-  /// End
-  let end: KeyframeGroup<LottieVector1D>?
-
-  /// The type of unit used by the start/end ranges
-  let textRangeUnit: TextRangeUnit?
-
   func encode(to encoder: Encoder) throws {
     var container = encoder.container(keyedBy: CodingKeys.self)
     var animatorContainer = container.nestedContainer(keyedBy: TextAnimatorKeys.self, forKey: .textAnimator)
@@ -209,7 +137,7 @@ final class TextAnimator: Codable, DictionaryInitializable {
   // MARK: Private
 
   private enum CodingKeys: String, CodingKey {
-    case textSelector = "s"
+//    case textSelector = "s" TODO
     case textAnimator = "a"
     case name = "nm"
   }
@@ -218,7 +146,6 @@ final class TextAnimator: Codable, DictionaryInitializable {
     case start = "s"
     case end = "e"
     case offset = "o"
-    case textRangeUnits = "r"
   }
 
   private enum TextAnimatorKeys: String, CodingKey {
@@ -232,9 +159,6 @@ final class TextAnimator: Codable, DictionaryInitializable {
     case skew = "sk"
     case skewAxis = "sa"
     case rotation = "r"
-    case rotationX = "rx"
-    case rotationY = "ry"
-    case rotationZ = "rz"
     case opacity = "o"
   }
 }

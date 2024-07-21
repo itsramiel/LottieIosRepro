@@ -5,12 +5,14 @@
 //  Created by Alexandr Goncharov on 07/06/2019.
 //
 
+import Foundation
+
 /// Connects a LottieTextProvider to a group of text layers
 final class LayerTextProvider {
 
   // MARK: Lifecycle
 
-  init(textProvider: AnimationKeypathTextProvider) {
+  init(textProvider: AnimationTextProvider) {
     self.textProvider = textProvider
     textLayers = []
     reloadTexts()
@@ -20,7 +22,7 @@ final class LayerTextProvider {
 
   private(set) var textLayers: [TextCompositionLayer]
 
-  var textProvider: AnimationKeypathTextProvider {
+  var textProvider: AnimationTextProvider {
     didSet {
       reloadTexts()
     }
@@ -31,8 +33,8 @@ final class LayerTextProvider {
   }
 
   func reloadTexts() {
-    for textLayer in textLayers {
-      textLayer.textProvider = textProvider
+    textLayers.forEach {
+      $0.textProvider = textProvider
     }
   }
 }

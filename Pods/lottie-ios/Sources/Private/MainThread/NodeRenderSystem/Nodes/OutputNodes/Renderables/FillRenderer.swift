@@ -5,24 +5,26 @@
 //  Created by Brandon Withrow on 1/30/19.
 //
 
+import CoreGraphics
+import Foundation
 import QuartzCore
 
 extension FillRule {
   var cgFillRule: CGPathFillRule {
     switch self {
     case .evenOdd:
-      .evenOdd
+      return .evenOdd
     default:
-      .winding
+      return .winding
     }
   }
 
   var caFillRule: CAShapeLayerFillRule {
     switch self {
     case .evenOdd:
-      CAShapeLayerFillRule.evenOdd
+      return CAShapeLayerFillRule.evenOdd
     default:
-      CAShapeLayerFillRule.nonZero
+      return CAShapeLayerFillRule.nonZero
     }
   }
 }

@@ -5,7 +5,9 @@
 //  Created by Brandon Withrow on 1/25/19.
 //
 
-#if canImport(UIKit)
+import CoreGraphics
+import Foundation
+#if os(iOS) || os(tvOS) || os(watchOS) || targetEnvironment(macCatalyst)
 import UIKit
 
 /// An `AnimationImageProvider` that provides images by name from a specific bundle.
@@ -21,24 +23,25 @@ public class BundleImageProvider: AnimationImageProvider {
   ///
   /// - Parameter bundle: The bundle containing images for the provider.
   /// - Parameter searchPath: The subpath is a path within the bundle to search for image assets.
-  /// - Parameter contentsGravity: The contents gravity to use when rendering the image.
   ///
-  public init(bundle: Bundle, searchPath: String?, contentsGravity: CALayerContentsGravity = .resize) {
+  public init(bundle: Bundle, searchPath: String?) {
     self.bundle = bundle
     self.searchPath = searchPath
-    self.contentsGravity = contentsGravity
   }
 
   // MARK: Public
 
   public func imageForAsset(asset: ImageAsset) -> CGImage? {
-    if let base64Image = asset.base64Image {
-      return base64Image
+    if
+      let data = Data(imageAsset: asset),
+      let image = UIImage(data: data)
+    {
+      return image.cgImage
     }
 
     let imagePath: String?
     /// Try to find the image in the bundle.
-    if let searchPath {
+    if let searchPath = searchPath {
       /// Search in the provided search path for the image
       var directoryPath = URL(fileURLWithPath: searchPath)
       directoryPath.appendPathComponent(asset.directory)
@@ -78,21 +81,9 @@ public class BundleImageProvider: AnimationImageProvider {
     return image.cgImage
   }
 
-  public func contentsGravity(for _: ImageAsset) -> CALayerContentsGravity {
-    contentsGravity
-  }
-
   // MARK: Internal
 
   let bundle: Bundle
   let searchPath: String?
-  let contentsGravity: CALayerContentsGravity
-}
-
-extension BundleImageProvider: Equatable {
-  public static func ==(_ lhs: BundleImageProvider, _ rhs: BundleImageProvider) -> Bool {
-    lhs.bundle == rhs.bundle
-      && lhs.searchPath == rhs.searchPath
-  }
 }
 #endif

@@ -5,25 +5,26 @@
 //  Created by Brandon Withrow on 1/25/19.
 //
 
+import Foundation
 import QuartzCore
 
 extension MaskMode {
   var usableMode: MaskMode {
     switch self {
     case .add:
-      .add
+      return .add
     case .subtract:
-      .subtract
+      return .subtract
     case .intersect:
-      .intersect
+      return .intersect
     case .lighten:
-      .add
+      return .add
     case .darken:
-      .darken
+      return .darken
     case .difference:
-      .intersect
+      return .intersect
     case .none:
-      .none
+      return .none
     }
   }
 }
@@ -72,9 +73,7 @@ final class MaskContainerLayer: CALayer {
   // MARK: Internal
 
   func updateWithFrame(frame: CGFloat, forceUpdates: Bool) {
-    for maskLayer in maskLayers {
-      maskLayer.updateWithFrame(frame: frame, forceUpdates: forceUpdates)
-    }
+    maskLayers.forEach({ $0.updateWithFrame(frame: frame, forceUpdates: forceUpdates) })
   }
 
   // MARK: Fileprivate
@@ -85,10 +84,10 @@ final class MaskContainerLayer: CALayer {
 extension CGRect {
   static var veryLargeRect: CGRect {
     CGRect(
-      x: -10_000_000,
-      y: -10_000_000,
-      width: 20_000_000,
-      height: 20_000_000)
+      x: -100_000_000,
+      y: -100_000_000,
+      width: 200_000_000,
+      height: 200_000_000)
   }
 }
 
@@ -104,8 +103,8 @@ private class MaskLayer: CALayer {
     addSublayer(maskLayer)
     anchorPoint = .zero
     maskLayer.fillColor = mask.mode == .add
-      ? .rgb(1, 0, 0)
-      : .rgb(0, 1, 0)
+      ? CGColor(colorSpace: CGColorSpaceCreateDeviceRGB(), components: [1, 0, 0, 1])
+      : CGColor(colorSpace: CGColorSpaceCreateDeviceRGB(), components: [0, 1, 0, 1])
     maskLayer.fillRule = CAShapeLayerFillRule.evenOdd
     actions = [
       "opacity" : NSNull(),
@@ -128,7 +127,7 @@ private class MaskLayer: CALayer {
   let maskLayer = CAShapeLayer()
 
   func updateWithFrame(frame: CGFloat, forceUpdates: Bool) {
-    guard let properties else { return }
+    guard let properties = properties else { return }
     if properties.opacity.needsUpdate(frame: frame) || forceUpdates {
       properties.opacity.update(frame: frame)
       opacity = Float(properties.opacity.value.cgFloatValue)
@@ -168,7 +167,7 @@ private class MaskNodeProperties: NodePropertyMap {
     shape = NodeProperty(provider: KeyframeInterpolator(keyframes: mask.shape.keyframes))
     expansion = NodeProperty(provider: KeyframeInterpolator(keyframes: mask.expansion.keyframes))
     propertyMap = [
-      PropertyName.opacity.rawValue : opacity,
+      "Opacity" : opacity,
       "Shape" : shape,
       "Expansion" : expansion,
     ]

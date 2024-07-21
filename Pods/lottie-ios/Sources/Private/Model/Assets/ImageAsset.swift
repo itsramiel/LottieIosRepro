@@ -5,14 +5,7 @@
 //  Created by Brandon Withrow on 1/9/19.
 //
 
-import CoreGraphics
 import Foundation
-
-#if canImport(UIKit)
-import UIKit
-#elseif canImport(AppKit)
-import AppKit
-#endif
 
 // MARK: - ImageAsset
 
@@ -77,7 +70,7 @@ extension Data {
   ///
   /// Returns nil when the input is not recognized as valid Data URL.
   /// - parameter imageAsset: The image asset that contains Data URL.
-  init?(imageAsset: ImageAsset) {
+  internal init?(imageAsset: ImageAsset) {
     self.init(dataString: imageAsset.name)
   }
 
@@ -86,11 +79,10 @@ extension Data {
   /// Returns nil when the input is not recognized as valid Data URL.
   /// - parameter dataString: The data string to parse.
   /// - parameter options: Options for the string parsing. Default value is `[]`.
-  init?(dataString: String, options: DataURLReadOptions = []) {
-    let trimmedDataString = dataString.trimmingCharacters(in: .whitespacesAndNewlines)
+  internal init?(dataString: String, options: DataURLReadOptions = []) {
     guard
       dataString.hasPrefix("data:"),
-      let url = URL(string: trimmedDataString)
+      let url = URL(string: dataString)
     else {
       return nil
     }
@@ -98,10 +90,10 @@ extension Data {
     // with messages since url doesn't have a host. This only fixes flooding logs
     // when data inside Data URL is base64 encoded.
     if
-      let base64Range = trimmedDataString.range(of: ";base64,"),
+      let base64Range = dataString.range(of: ";base64,"),
       !options.contains(DataURLReadOptions.legacy)
     {
-      let encodedString = String(trimmedDataString[base64Range.upperBound...])
+      let encodedString = String(dataString[base64Range.upperBound...])
       self.init(base64Encoded: encodedString)
     } else {
       try? self.init(contentsOf: url)
@@ -110,24 +102,11 @@ extension Data {
 
   // MARK: Internal
 
-  struct DataURLReadOptions: OptionSet {
+  internal struct DataURLReadOptions: OptionSet {
     let rawValue: Int
 
     /// Will read Data URL using Data(contentsOf:)
     static let legacy = DataURLReadOptions(rawValue: 1 << 0)
   }
 
-}
-
-extension ImageAsset {
-  /// A `CGImage` loaded from this asset if represented using a Base 64 encoding
-  var base64Image: CGImage? {
-    guard let data = Data(imageAsset: self) else { return nil }
-
-    #if canImport(UIKit)
-    return UIImage(data: data)?.cgImage
-    #elseif canImport(AppKit)
-    return NSImage(data: data)?.lottie_CGImage
-    #endif
-  }
 }

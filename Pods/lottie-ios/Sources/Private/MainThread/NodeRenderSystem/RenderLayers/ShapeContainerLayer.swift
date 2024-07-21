@@ -5,6 +5,7 @@
 //  Created by Brandon Withrow on 1/30/19.
 //
 
+import Foundation
 import QuartzCore
 
 /// The base layer that holds Shapes and Shape Renderers
@@ -55,9 +56,7 @@ class ShapeContainerLayer: CALayer {
       rebuildContents(forFrame: forFrame)
     }
     guard isHidden == false else { return }
-    for renderLayer in renderLayers {
-      renderLayer.markRenderUpdates(forFrame: forFrame)
-    }
+    renderLayers.forEach { $0.markRenderUpdates(forFrame: forFrame) }
   }
 
   func hasRenderUpdate(forFrame _: CGFloat) -> Bool {
@@ -70,9 +69,7 @@ class ShapeContainerLayer: CALayer {
 
   func updateRenderScale() {
     contentsScale = renderScale
-    for renderLayer in renderLayers {
-      renderLayer.renderScale = renderScale
-    }
+    renderLayers.forEach({ $0.renderScale = renderScale })
   }
 
 }

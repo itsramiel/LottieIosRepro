@@ -15,7 +15,7 @@ protocol AnimationLayer: CALayer {
 
 // MARK: - LayerAnimationContext
 
-/// Context describing the timing parameters of the current animation
+// Context describing the timing parameters of the current animation
 struct LayerAnimationContext {
   /// The animation being played
   let animation: LottieAnimation
@@ -38,51 +38,19 @@ struct LayerAnimationContext {
   /// The logger that should be used for assertions and warnings
   let logger: LottieLogger
 
-  /// Mutable state related to log events, stored on the `CoreAnimationLayer`.
-  let loggingState: LoggingState
-
   /// The AnimationKeypath represented by the current layer
   var currentKeypath: AnimationKeypath
 
-  /// The `AnimationKeypathTextProvider`
-  var textProvider: AnimationKeypathTextProvider
+  /// The `AnimationTextProvider`
+  var textProvider: AnimationTextProvider
 
-  /// Records the given animation keypath so it can be logged or collected into a list
-  ///  - Used for `CoreAnimationLayer.logHierarchyKeypaths()` and `allHierarchyKeypaths()`
-  var recordHierarchyKeypath: ((String) -> Void)?
+  /// Whether or not to log `AnimationKeypath`s for all of the animation's layers
+  ///  - Used for `CoreAnimationLayer.logHierarchyKeypaths()`
+  var logHierarchyKeypaths: Bool
 
   /// A closure that remaps the given frame in the child layer's local time to a frame
-  /// in the animation's overall global time.
-  ///  - This time remapping is simple and only used `preCompLayer.timeStretch` and `preCompLayer.startTime`,
-  ///    so is a trivial function and is invertible. This allows us to invert the time remapping from
-  ///    "global time to local time" to instead be "local time to global time".
-  private(set) var simpleTimeRemapping: ((_ localTime: AnimationFrameTime) -> AnimationFrameTime) = { $0 }
-
-  /// A complex time remapping closure that remaps the given frame in the animation's overall global time
-  /// into the child layer's local time.
-  ///  - This time remapping is arbitrarily complex because it includes the full `preCompLayer.timeRemapping`.
-  ///  - Since it isn't possible to invert the time remapping function, this can only be applied by converting
-  ///    from global time to local time. This requires using `Keyframes.manuallyInterpolatedWithTimeRemapping`.
-  private(set) var complexTimeRemapping: ((_ globalTime: AnimationFrameTime) -> AnimationFrameTime) = { $0 }
-
-  /// Whether or not this layer is required to use the `complexTimeRemapping` via
-  /// the more expensive `Keyframes.manuallyInterpolatedWithTimeRemapping` codepath.
-  var mustUseComplexTimeRemapping = false
-
-  /// The duration of the animation
-  var animationDuration: AnimationFrameTime {
-    // Normal animation playback (like when looping) skips the last frame.
-    // However when the animation is paused, we need to be able to render the final frame.
-    // To allow this we have to extend the length of the animation by one frame.
-    let animationEndFrame: AnimationFrameTime =
-      if timingConfiguration.speed == 0 {
-        animation.endFrame + 1
-      } else {
-        animation.endFrame
-      }
-
-    return Double(animationEndFrame - animation.startFrame) / animation.framerate
-  }
+  /// in the animation's overall global time
+  private(set) var timeRemapping: ((AnimationFrameTime) -> AnimationFrameTime) = { $0 }
 
   /// Adds the given component string to the `AnimationKeypath` stored
   /// that describes the current path being configured by this context value
@@ -93,77 +61,26 @@ struct LayerAnimationContext {
   }
 
   /// The `AnimationProgressTime` for the given `AnimationFrameTime` within this layer,
-  /// accounting for the `simpleTimeRemapping` applied to this layer.
-  func progressTime(for frame: AnimationFrameTime) throws -> AnimationProgressTime {
-    try compatibilityAssert(
-      !mustUseComplexTimeRemapping,
-      "LayerAnimationContext.time(forFrame:) does not support complex time remapping")
-
-    let animationFrameCount = animationDuration * animation.framerate
-    return (simpleTimeRemapping(frame) - animation.startFrame) / animationFrameCount
+  /// accounting for the `timeRemapping` applied to this layer
+  func progressTime(for frame: AnimationFrameTime) -> AnimationProgressTime {
+    animation.progressTime(forFrame: timeRemapping(frame), clamped: false)
   }
 
   /// The real-time `TimeInterval` for the given `AnimationFrameTime` within this layer,
-  /// accounting for the `simpleTimeRemapping` applied to this layer.
-  func time(forFrame frame: AnimationFrameTime) throws -> TimeInterval {
-    try compatibilityAssert(
-      !mustUseComplexTimeRemapping,
-      "LayerAnimationContext.time(forFrame:) does not support complex time remapping")
-
-    return animation.time(forFrame: simpleTimeRemapping(frame))
+  /// accounting for the `timeRemapping` applied to this layer
+  func time(for frame: AnimationFrameTime) -> TimeInterval {
+    animation.time(forFrame: timeRemapping(frame))
   }
 
-  /// Chains an additional time remapping closure onto the `simpleTimeRemapping` closure
-  func withSimpleTimeRemapping(
-    _ additionalSimpleTimeRemapping: @escaping (_ localTime: AnimationFrameTime) -> AnimationFrameTime)
+  /// Chains an additional `timeRemapping` closure onto this layer context
+  func withTimeRemapping(
+    _ additionalTimeRemapping: @escaping (AnimationFrameTime) -> AnimationFrameTime)
     -> LayerAnimationContext
   {
     var copy = self
-    copy.simpleTimeRemapping = { [existingSimpleTimeRemapping = simpleTimeRemapping] time in
-      existingSimpleTimeRemapping(additionalSimpleTimeRemapping(time))
+    copy.timeRemapping = { [existingTimeRemapping = timeRemapping] time in
+      existingTimeRemapping(additionalTimeRemapping(time))
     }
     return copy
   }
-
-  /// Chains an additional time remapping closure onto the `complexTimeRemapping` closure.
-  ///  - If `required` is `true`, all subsequent child layers will be required to use the expensive
-  ///    `complexTimeRemapping` / `Keyframes.manuallyInterpolatedWithTimeRemapping` codepath.
-  ///  - `required: true` is necessary when this time remapping is not available via `simpleTimeRemapping`.
-  func withComplexTimeRemapping(
-    required: Bool,
-    _ additionalComplexTimeRemapping: @escaping (_ globalTime: AnimationFrameTime) -> AnimationFrameTime)
-    -> LayerAnimationContext
-  {
-    var copy = self
-    copy.mustUseComplexTimeRemapping = copy.mustUseComplexTimeRemapping || required
-    copy.complexTimeRemapping = { [existingComplexTimeRemapping = complexTimeRemapping] time in
-      additionalComplexTimeRemapping(existingComplexTimeRemapping(time))
-    }
-    return copy
-  }
-
-  /// Returns a copy of this context with time remapping removed
-  func withoutTimeRemapping() -> LayerAnimationContext {
-    var copy = self
-    copy.simpleTimeRemapping = { $0 }
-    copy.complexTimeRemapping = { $0 }
-    copy.mustUseComplexTimeRemapping = false
-    return copy
-  }
-}
-
-// MARK: - LoggingState
-
-/// Mutable state related to log events, stored on the `CoreAnimationLayer`.
-final class LoggingState {
-
-  // MARK: Lifecycle
-
-  init() { }
-
-  // MARK: Internal
-
-  /// Whether or not the warning about unsupported After Effects expressions
-  /// has been logged yet for this layer.
-  var hasLoggedAfterEffectsExpressionsWarning = false
 }

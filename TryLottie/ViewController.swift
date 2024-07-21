@@ -14,7 +14,7 @@ class ViewController: UIViewController {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
         
-        let animationView = LottieAnimationView(name: "heart")
+        let animationView = AnimationView(name: "heart")
         animationView.frame = CGRect(x: 0, y: 0, width: 400, height: 400)
         animationView.center = view.center
         animationView.contentMode = .scaleAspectFill

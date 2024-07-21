@@ -5,9 +5,11 @@
 //  Created by Brandon Withrow on 1/8/19.
 //
 
+import Foundation
+
 // MARK: - StarType
 
-enum StarType: Int, Codable, Sendable {
+enum StarType: Int, Codable {
   case none
   case star
   case polygon
@@ -64,7 +66,7 @@ final class Star: ShapeItem {
     points = try KeyframeGroup<LottieVector1D>(dictionary: pointsDictionary)
     let starTypeRawValue: Int = try dictionary.value(for: CodingKeys.starType)
     guard let starType = StarType(rawValue: starTypeRawValue) else {
-      throw InitializableError.invalidInput()
+      throw InitializableError.invalidInput
     }
     self.starType = starType
     try super.init(dictionary: dictionary)

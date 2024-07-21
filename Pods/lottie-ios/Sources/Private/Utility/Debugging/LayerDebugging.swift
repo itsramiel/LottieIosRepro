@@ -5,6 +5,7 @@
 //  Created by Brandon Withrow on 1/24/19.
 //
 
+import Foundation
 import QuartzCore
 
 // MARK: - LayerDebugStyle
@@ -53,7 +54,7 @@ extension CALayer {
     }
     string = string + "|_" + String(describing: self)
     LottieLogger.shared.info(string)
-    if let sublayers {
+    if let sublayers = sublayers {
       for sublayer in sublayers {
         sublayer.logLayerTree(withIndent: withIndent + 1)
       }
@@ -74,12 +75,12 @@ extension CALayer {
 
   @nonobjc
   func setDebuggingState(visible: Bool) {
-    var sublayers = sublayers
+    var sublayers = self.sublayers
     if let cust = self as? CustomLayerDebugging {
       sublayers = cust.layerForDebugging().sublayers
     }
 
-    if let sublayers {
+    if let sublayers = sublayers {
       for i in 0..<sublayers.count {
         if let debugLayer = sublayers[i] as? DebugLayer {
           debugLayer.removeFromSuperlayer()
@@ -88,19 +89,17 @@ extension CALayer {
       }
     }
 
-    if let sublayers {
-      for sublayer in sublayers {
-        sublayer.setDebuggingState(visible: visible)
-      }
+    if let sublayers = sublayers {
+      sublayers.forEach({ $0.setDebuggingState(visible: visible) })
     }
 
     if visible {
-      let style: LayerDebugStyle =
-        if let layerDebugging = self as? LayerDebugging {
-          layerDebugging.debugStyle
-        } else {
-          LayerDebugStyle.defaultStyle()
-        }
+      let style: LayerDebugStyle
+      if let layerDebugging = self as? LayerDebugging {
+        style = layerDebugging.debugStyle
+      } else {
+        style = LayerDebugStyle.defaultStyle()
+      }
       let debugLayer = DebugLayer(style: style)
       var container = self
       if let cust = self as? CustomLayerDebugging {
@@ -151,8 +150,10 @@ extension ShapeRenderLayer: LayerDebugging {
 
 extension LayerDebugStyle {
   static func defaultStyle() -> LayerDebugStyle {
-    let anchorColor = CGColor.rgb(1, 0, 0)
-    let boundsColor = CGColor.rgb(1, 1, 0)
+    let colorSpace = CGColorSpaceCreateDeviceRGB()
+
+    let anchorColor = CGColor(colorSpace: colorSpace, components: [1, 0, 0, 1])!
+    let boundsColor = CGColor(colorSpace: colorSpace, components: [1, 1, 0, 1])!
     return LayerDebugStyle(
       anchorColor: anchorColor,
       boundsColor: boundsColor,
@@ -161,8 +162,9 @@ extension LayerDebugStyle {
   }
 
   static func topLayerStyle() -> LayerDebugStyle {
-    let anchorColor = CGColor.rgba(1, 0.5, 0, 0)
-    let boundsColor = CGColor.rgb(0, 1, 0)
+    let colorSpace = CGColorSpaceCreateDeviceRGB()
+    let anchorColor = CGColor(colorSpace: colorSpace, components: [1, 0.5, 0, 0])!
+    let boundsColor = CGColor(colorSpace: colorSpace, components: [0, 1, 0, 1])!
 
     return LayerDebugStyle(
       anchorColor: anchorColor,
@@ -172,8 +174,9 @@ extension LayerDebugStyle {
   }
 
   static func nullLayerStyle() -> LayerDebugStyle {
-    let anchorColor = CGColor.rgba(0, 0, 1, 0)
-    let boundsColor = CGColor.rgb(0, 1, 0)
+    let colorSpace = CGColorSpaceCreateDeviceRGB()
+    let anchorColor = CGColor(colorSpace: colorSpace, components: [0, 0, 1, 0])!
+    let boundsColor = CGColor(colorSpace: colorSpace, components: [0, 1, 0, 1])!
 
     return LayerDebugStyle(
       anchorColor: anchorColor,
@@ -183,8 +186,9 @@ extension LayerDebugStyle {
   }
 
   static func shapeLayerStyle() -> LayerDebugStyle {
-    let anchorColor = CGColor.rgba(0, 1, 0, 0)
-    let boundsColor = CGColor.rgb(0, 1, 0)
+    let colorSpace = CGColorSpaceCreateDeviceRGB()
+    let anchorColor = CGColor(colorSpace: colorSpace, components: [0, 1, 0, 0])!
+    let boundsColor = CGColor(colorSpace: colorSpace, components: [0, 1, 0, 1])!
 
     return LayerDebugStyle(
       anchorColor: anchorColor,
@@ -194,8 +198,9 @@ extension LayerDebugStyle {
   }
 
   static func shapeRenderLayerStyle() -> LayerDebugStyle {
-    let anchorColor = CGColor.rgba(0, 1, 1, 0)
-    let boundsColor = CGColor.rgb(0, 1, 0)
+    let colorSpace = CGColorSpaceCreateDeviceRGB()
+    let anchorColor = CGColor(colorSpace: colorSpace, components: [0, 1, 1, 0])!
+    let boundsColor = CGColor(colorSpace: colorSpace, components: [0, 1, 0, 1])!
 
     return LayerDebugStyle(
       anchorColor: anchorColor,
@@ -205,7 +210,7 @@ extension LayerDebugStyle {
   }
 }
 
-extension [LayerModel] {
+extension Array where Element == LayerModel {
 
   var parents: [Int] {
     var array = [Int]()

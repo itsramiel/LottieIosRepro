@@ -5,9 +5,11 @@
 //  Created by Brandon Withrow on 1/8/19.
 //
 
+import Foundation
+
 // MARK: - GradientType
 
-enum GradientType: Int, Codable, Sendable {
+enum GradientType: Int, Codable {
   case none
   case linear
   case radial
@@ -43,7 +45,7 @@ final class GradientFill: ShapeItem {
     endPoint = try KeyframeGroup<LottieVector3D>(dictionary: endPointDictionary)
     let gradientRawType: Int = try dictionary.value(for: CodingKeys.gradientType)
     guard let gradient = GradientType(rawValue: gradientRawType) else {
-      throw InitializableError.invalidInput()
+      throw InitializableError.invalidInput
     }
     gradientType = gradient
     if let highlightLengthDictionary = dictionary[CodingKeys.highlightLength.rawValue] as? [String: Any] {

@@ -5,13 +5,12 @@
 //  Created by Brandon Withrow on 2/1/19.
 //
 
+import CoreGraphics
 import Foundation
 import QuartzCore
 
-/// A completion block for animations.
-///  - `true` is passed in if the animation completed playing.
-///  - `false` is passed in if the animation was interrupted and did not complete playing.
-public typealias LottieCompletionBlock = (_ completed: Bool) -> Void
+/// A completion block for animations. `true` is passed in if the animation completed playing.
+public typealias LottieCompletionBlock = (Bool) -> Void
 
 // MARK: - AnimationContext
 
@@ -70,13 +69,13 @@ class AnimationCompletionDelegate: NSObject, CAAnimationDelegate {
   public func animationDidStop(_ anim: CAAnimation, finished flag: Bool) {
     guard ignoreDelegate == false else { return }
     animationState = flag ? .complete : .cancelled
-    if let animationLayer, let key = animationKey {
+    if let animationLayer = animationLayer, let key = animationKey {
       animationLayer.removeAnimation(forKey: key)
       if flag {
         animationLayer.currentFrame = (anim as! CABasicAnimation).toValue as! CGFloat
       }
     }
-    if let completionBlock {
+    if let completionBlock = completionBlock {
       completionBlock(flag)
     }
   }

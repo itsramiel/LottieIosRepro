@@ -6,7 +6,9 @@
 //  Copyright © 2020 YurtvilleProds. All rights reserved.
 //
 
+import CoreGraphics
 import CoreText
+import Foundation
 
 // MARK: - AnimationFontProvider
 
@@ -29,13 +31,5 @@ public final class DefaultFontProvider: AnimationFontProvider {
 
   public func fontFor(family: String, size: CGFloat) -> CTFont? {
     CTFontCreateWithName(family as CFString, size, nil)
-  }
-}
-
-// MARK: Equatable
-
-extension DefaultFontProvider: Equatable {
-  public static func ==(_: DefaultFontProvider, _: DefaultFontProvider) -> Bool {
-    true
   }
 }

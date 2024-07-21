@@ -6,6 +6,7 @@
 //
 
 import CoreGraphics
+import Foundation
 
 // MARK: - BezierPath
 
@@ -343,14 +344,7 @@ extension BezierPath: Codable {
       totalLength = totalLength + pathElement.length
     }
     if closed {
-      // Don't use an out tangent for the closing point, since the
-      // closing point is exactly equal to the starting point.
-      let closeVertex = CurveVertex(
-        point: firstVertex.point,
-        inTangentRelative: firstVertex.inTangentRelative,
-        outTangentRelative: .zero)
-
-      let closeElement = previousElement.pathElementTo(closeVertex)
+      let closeElement = previousElement.pathElementTo(firstVertex)
       decodedElements.append(closeElement)
       totalLength = totalLength + closeElement.length
     }
@@ -411,7 +405,7 @@ extension BezierPath: AnyInitializable {
     } else if let dictionary = value as? [String: Any] {
       pathDictionary = dictionary
     } else {
-      throw InitializableError.invalidInput()
+      throw InitializableError.invalidInput
     }
     closed = (try? pathDictionary.value(for: CodingKeys.closed)) ?? true
     var vertexDictionaries: [Any] = try pathDictionary.value(for: CodingKeys.vertices)
@@ -419,9 +413,9 @@ extension BezierPath: AnyInitializable {
     var outPointsDictionaries: [Any] = try pathDictionary.value(for: CodingKeys.outPoints)
     guard
       vertexDictionaries.count == inPointsDictionaries.count,
-      inPointsDictionaries.count == outPointsDictionaries.count
-    else {
-      throw InitializableError.invalidInput()
+      inPointsDictionaries.count == outPointsDictionaries.count else
+    {
+      throw InitializableError.invalidInput
     }
     guard vertexDictionaries.count > 0 else {
       length = 0
@@ -455,14 +449,7 @@ extension BezierPath: AnyInitializable {
       totalLength = totalLength + pathElement.length
     }
     if closed {
-      // Don't use an out tangent for the closing point, since the
-      // closing point is exactly equal to the starting point.
-      let closeVertex = CurveVertex(
-        point: firstVertex.point,
-        inTangentRelative: firstVertex.inTangentRelative,
-        outTangentRelative: .zero)
-
-      let closeElement = previousElement.pathElementTo(closeVertex)
+      let closeElement = previousElement.pathElementTo(firstVertex)
       decodedElements.append(closeElement)
       totalLength = totalLength + closeElement.length
     }

@@ -8,18 +8,14 @@
 import CoreGraphics
 import Foundation
 
-extension [LayerModel] {
+extension Array where Element == LayerModel {
 
   func initializeCompositionLayers(
     assetLibrary: AssetLibrary?,
     layerImageProvider: LayerImageProvider,
-    layerTextProvider: LayerTextProvider,
-    layerFontProvider: LayerFontProvider,
-    textProvider: AnimationKeypathTextProvider,
+    textProvider: AnimationTextProvider,
     fontProvider: AnimationFontProvider,
-    frameRate: CGFloat,
-    rootAnimationLayer: MainThreadAnimationLayer?)
-    -> [CompositionLayer]
+    frameRate: CGFloat) -> [CompositionLayer]
   {
     var compositionLayers = [CompositionLayer]()
     var layerMap = [Int : CompositionLayer]()
@@ -42,25 +38,22 @@ extension [LayerModel] {
         layerMap[layer.index] = solidContainer
       } else if
         let precompLayer = layer as? PreCompLayerModel,
-        let assetLibrary,
+        let assetLibrary = assetLibrary,
         let precompAsset = assetLibrary.precompAssets[precompLayer.referenceID]
       {
         let precompContainer = PreCompositionLayer(
           precomp: precompLayer,
           asset: precompAsset,
           layerImageProvider: layerImageProvider,
-          layerTextProvider: layerTextProvider,
-          layerFontProvider: layerFontProvider,
           textProvider: textProvider,
           fontProvider: fontProvider,
           assetLibrary: assetLibrary,
-          frameRate: frameRate,
-          rootAnimationLayer: rootAnimationLayer)
+          frameRate: frameRate)
         compositionLayers.append(precompContainer)
         layerMap[layer.index] = precompContainer
       } else if
         let imageLayer = layer as? ImageLayerModel,
-        let assetLibrary,
+        let assetLibrary = assetLibrary,
         let imageAsset = assetLibrary.imageAssets[imageLayer.referenceID]
       {
         let imageContainer = ImageCompositionLayer(
@@ -69,11 +62,7 @@ extension [LayerModel] {
         compositionLayers.append(imageContainer)
         layerMap[layer.index] = imageContainer
       } else if let textLayer = layer as? TextLayerModel {
-        let textContainer = TextCompositionLayer(
-          textLayer: textLayer,
-          textProvider: textProvider,
-          fontProvider: fontProvider,
-          rootAnimationLayer: rootAnimationLayer)
+        let textContainer = TextCompositionLayer(textLayer: textLayer, textProvider: textProvider, fontProvider: fontProvider)
         compositionLayers.append(textContainer)
         layerMap[layer.index] = textContainer
       } else {

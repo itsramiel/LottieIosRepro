@@ -5,6 +5,7 @@
 //  Created by Brandon Withrow on 2/4/19.
 //
 
+import Foundation
 import QuartzCore
 
 extension KeypathSearchable {
@@ -114,58 +115,20 @@ extension KeypathSearchable {
     return nil
   }
 
-  /// Searches this layer's keypaths to find the keypath for the given layer
-  func keypath(for layer: CALayer) -> AnimationKeypath? {
-    let allKeypaths = layerKeypaths()
-    return allKeypaths[layer]
-  }
-
-  /// Computes the list of animation keypaths that descend from this layer
-  func allKeypaths(for keyPath: AnimationKeypath? = nil) -> [String] {
-    var allKeypaths: [String] = []
-
-    let newKeypath: AnimationKeypath =
-      if let previousKeypath = keyPath {
-        previousKeypath.appendingKey(keypathName)
-      } else {
-        AnimationKeypath(keys: [keypathName])
-      }
-
-    allKeypaths.append(newKeypath.fullPath)
-
+  func logKeypaths(for keyPath: AnimationKeypath?, logger: LottieLogger) {
+    let newKeypath: AnimationKeypath
+    if let previousKeypath = keyPath {
+      newKeypath = previousKeypath.appendingKey(keypathName)
+    } else {
+      newKeypath = AnimationKeypath(keys: [keypathName])
+    }
+    logger.info(newKeypath.fullPath)
     for key in keypathProperties.keys {
-      allKeypaths.append(newKeypath.appendingKey(key).fullPath)
+      logger.info(newKeypath.appendingKey(key).fullPath)
     }
-
     for child in childKeypaths {
-      allKeypaths.append(contentsOf: child.allKeypaths(for: newKeypath))
+      child.logKeypaths(for: newKeypath, logger: logger)
     }
-
-    return allKeypaths
-  }
-
-  /// Computes the list of animation keypaths that descend from this layer
-  func layerKeypaths(for keyPath: AnimationKeypath? = nil) -> [CALayer: AnimationKeypath] {
-    var allKeypaths: [CALayer: AnimationKeypath] = [:]
-
-    let newKeypath: AnimationKeypath =
-      if let previousKeypath = keyPath {
-        previousKeypath.appendingKey(keypathName)
-      } else {
-        AnimationKeypath(keys: [keypathName])
-      }
-
-    if let layer = self as? CALayer {
-      allKeypaths[layer] = newKeypath
-    }
-
-    for child in childKeypaths {
-      for (layer, keypath) in child.layerKeypaths(for: newKeypath) {
-        allKeypaths[layer] = keypath
-      }
-    }
-
-    return allKeypaths
   }
 }
 
@@ -197,13 +160,13 @@ extension AnimationKeypath {
     keys.joined(separator: ".")
   }
 
-  /// Pops the top keypath from the stack if the keyname matches.
+  // Pops the top keypath from the stack if the keyname matches.
   func popKey(_ keyname: String) -> AnimationKeypath? {
     guard
-      let currentKey,
+      let currentKey = currentKey,
       currentKey.equalsKeypath(keyname),
-      keys.count > 1
-    else {
+      keys.count > 1 else
+    {
       // Current key either doesnt match or we are on the last key.
       return nil
     }
@@ -214,7 +177,7 @@ extension AnimationKeypath {
     if currentKey.keyPathType == .fuzzyWildcard {
       /// Dont remove if current key is a fuzzy wildcard, and if the next keypath doesnt equal keypathname
       if
-        let nextKeypath,
+        let nextKeypath = nextKeypath,
         nextKeypath.equalsKeypath(keyname)
       {
         /// Remove next two keypaths. This keypath breaks the wildcard.
@@ -245,11 +208,11 @@ extension String {
   var keyPathType: KeyType {
     switch self {
     case "*":
-      .wildcard
+      return .wildcard
     case "**":
-      .fuzzyWildcard
+      return .fuzzyWildcard
     default:
-      .specific
+      return .specific
     }
   }
 
@@ -262,8 +225,8 @@ extension String {
     }
     if let index = firstIndex(of: "*") {
       // Wildcard search.
-      let prefix = String(prefix(upTo: index))
-      let suffix = String(suffix(from: self.index(after: index)))
+      let prefix = String(self.prefix(upTo: index))
+      let suffix = String(self.suffix(from: self.index(after: index)))
 
       if prefix.count > 0 {
         // Match prefix.

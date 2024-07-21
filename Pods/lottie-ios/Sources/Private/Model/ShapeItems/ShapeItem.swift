@@ -5,9 +5,52 @@
 //  Created by Brandon Withrow on 1/8/19.
 //
 
+import Foundation
+
+// MARK: - ShapeType + ClassFamily
+
+/// Used for mapping a heterogeneous list to classes for parsing.
+extension ShapeType: ClassFamily {
+
+  static var discriminator: Discriminator = .type
+
+  func getType() -> AnyObject.Type {
+    switch self {
+    case .ellipse:
+      return Ellipse.self
+    case .fill:
+      return Fill.self
+    case .gradientFill:
+      return GradientFill.self
+    case .group:
+      return Group.self
+    case .gradientStroke:
+      return GradientStroke.self
+    case .merge:
+      return Merge.self
+    case .rectangle:
+      return Rectangle.self
+    case .repeater:
+      return Repeater.self
+    case .shape:
+      return Shape.self
+    case .star:
+      return Star.self
+    case .stroke:
+      return Stroke.self
+    case .trim:
+      return Trim.self
+    case .transform:
+      return ShapeTransform.self
+    default:
+      return ShapeItem.self
+    }
+  }
+}
+
 // MARK: - ShapeType
 
-enum ShapeType: String, Codable, Sendable {
+enum ShapeType: String, Codable {
   case ellipse = "el"
   case fill = "fl"
   case gradientFill = "gf"
@@ -26,48 +69,6 @@ enum ShapeType: String, Codable, Sendable {
 
   public init(from decoder: Decoder) throws {
     self = try ShapeType(rawValue: decoder.singleValueContainer().decode(RawValue.self)) ?? .unknown
-  }
-}
-
-// MARK: ClassFamily
-
-extension ShapeType: ClassFamily {
-
-  static var discriminator: Discriminator = .type
-
-  func getType() -> AnyObject.Type {
-    switch self {
-    case .ellipse:
-      Ellipse.self
-    case .fill:
-      Fill.self
-    case .gradientFill:
-      GradientFill.self
-    case .group:
-      Group.self
-    case .gradientStroke:
-      GradientStroke.self
-    case .merge:
-      Merge.self
-    case .rectangle:
-      Rectangle.self
-    case .repeater:
-      Repeater.self
-    case .round:
-      RoundedCorners.self
-    case .shape:
-      Shape.self
-    case .star:
-      Star.self
-    case .stroke:
-      Stroke.self
-    case .trim:
-      Trim.self
-    case .transform:
-      ShapeTransform.self
-    default:
-      ShapeItem.self
-    }
   }
 }
 
@@ -120,7 +121,7 @@ class ShapeItem: Codable, DictionaryInitializable {
   }
 }
 
-extension [ShapeItem] {
+extension Array where Element == ShapeItem {
 
   static func fromDictionaries(_ dictionaries: [[String: Any]]) throws -> [ShapeItem] {
     try dictionaries.compactMap { dictionary in
@@ -142,8 +143,6 @@ extension [ShapeItem] {
         return try Rectangle(dictionary: dictionary)
       case .repeater:
         return try Repeater(dictionary: dictionary)
-      case .round:
-        return try RoundedCorners(dictionary: dictionary)
       case .shape:
         return try Shape(dictionary: dictionary)
       case .star:
@@ -162,10 +161,3 @@ extension [ShapeItem] {
     }
   }
 }
-
-// MARK: - ShapeItem + Sendable
-
-/// Since `ShapeItem` isn't `final`, we have to use `@unchecked Sendable` instead of `Sendable.`
-/// All `ShapeItem` subclasses are immutable `Sendable` values.
-// swiftlint:disable:next no_unchecked_sendable
-extension ShapeItem: @unchecked Sendable { }

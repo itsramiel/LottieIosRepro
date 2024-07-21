@@ -5,6 +5,8 @@
 //  Created by Brandon Withrow on 1/25/19.
 //
 
+import CoreGraphics
+import Foundation
 import QuartzCore
 
 final class ImageCompositionLayer: CompositionLayer {
@@ -38,17 +40,11 @@ final class ImageCompositionLayer: CompositionLayer {
 
   var image: CGImage? = nil {
     didSet {
-      if let image {
+      if let image = image {
         contentsLayer.contents = image
       } else {
         contentsLayer.contents = nil
       }
-    }
-  }
-
-  var imageContentsGravity: CALayerContentsGravity = .resize {
-    didSet {
-      contentsLayer.contentsGravity = imageContentsGravity
     }
   }
 }

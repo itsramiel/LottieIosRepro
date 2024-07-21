@@ -8,8 +8,6 @@
 import CoreGraphics
 import Foundation
 
-// MARK: - SizeValueProvider
-
 /// A `ValueProvider` that returns a CGSize Value
 public final class SizeValueProvider: ValueProvider {
 
@@ -19,7 +17,6 @@ public final class SizeValueProvider: ValueProvider {
   public init(block: @escaping SizeValueBlock) {
     self.block = block
     size = .zero
-    identity = UUID()
   }
 
   /// Initializes with a single size.
@@ -27,7 +24,6 @@ public final class SizeValueProvider: ValueProvider {
     self.size = size
     block = nil
     hasUpdate = true
-    identity = [size.width, size.height]
   }
 
   // MARK: Public
@@ -48,7 +44,7 @@ public final class SizeValueProvider: ValueProvider {
   }
 
   public var storage: ValueProviderStorage<LottieVector3D> {
-    if let block {
+    if let block = block {
       return .closure { frame in
         self.hasUpdate = false
         return block(frame).vector3dValue
@@ -71,13 +67,4 @@ public final class SizeValueProvider: ValueProvider {
   private var hasUpdate = true
 
   private var block: SizeValueBlock?
-  private let identity: AnyHashable
-}
-
-// MARK: Equatable
-
-extension SizeValueProvider: Equatable {
-  public static func ==(_ lhs: SizeValueProvider, _ rhs: SizeValueProvider) -> Bool {
-    lhs.identity == rhs.identity
-  }
 }

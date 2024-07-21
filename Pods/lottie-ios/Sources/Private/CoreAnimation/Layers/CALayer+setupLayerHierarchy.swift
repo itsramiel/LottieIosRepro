@@ -51,7 +51,7 @@ extension CALayer {
     }
 
     // Create an `AnimationLayer` for each `LayerModel`
-    for (layerModel, mask) in try layersInZAxisOrder.pairedLayersAndMasks() {
+    for (layerModel, mask) in try layersInZAxisOrder.pairedLayersAndMasks(context: context) {
       guard let layer = try layerModel.makeAnimationLayer(context: context) else {
         continue
       }
@@ -67,7 +67,7 @@ extension CALayer {
 
       // Create the `mask` layer for this layer, if it has a `MatteType`
       if
-        let mask,
+        let mask = mask,
         let maskLayer = try maskLayer(for: mask.model, type: mask.matteType, context: context)
       {
         let maskParentTransformLayer = makeParentTransformLayer(
@@ -106,8 +106,8 @@ extension CALayer {
   fileprivate func maskLayer(
     for matteLayerModel: LayerModel,
     type: MatteType,
-    context: LayerContext)
-    throws -> CALayer?
+    context: LayerContext) throws
+    -> CALayer?
   {
     switch type {
     case .add:
@@ -123,9 +123,7 @@ extension CALayer {
       // layer being masked, this creates an inverted mask where only areas _outside_
       // of the mask layer are visible.
       // https://developer.apple.com/documentation/coregraphics/cgblendmode/xor
-      //  - The inverted mask is supposed to expand infinitely around the shape,
-      //    so we use `InfiniteOpaqueAnimationLayer`
-      let base = InfiniteOpaqueAnimationLayer()
+      let base = BaseAnimationLayer()
       base.backgroundColor = .rgb(0, 0, 0)
       base.addSublayer(maskLayer)
       maskLayer.compositingFilter = "xor"
@@ -138,12 +136,12 @@ extension CALayer {
 
 }
 
-extension Collection<LayerModel> {
+extension Collection where Element == LayerModel {
   /// Pairs each `LayerModel` within this array with
   /// a `LayerModel` to use as its mask, if applicable
   /// based on the layer's `MatteType` configuration.
   ///  - Assumes the layers are sorted in z-axis order.
-  fileprivate func pairedLayersAndMasks() throws
+  fileprivate func pairedLayersAndMasks(context _: LayerContext) throws
     -> [(layer: LayerModel, mask: (model: LayerModel, matteType: MatteType)?)]
   {
     var layersAndMasks = [(layer: LayerModel, mask: (model: LayerModel, matteType: MatteType)?)]()

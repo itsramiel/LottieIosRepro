@@ -5,13 +5,9 @@
 //  Created by Brandon Withrow on 2/4/19.
 //
 
-#if canImport(UIKit)
+import Foundation
+#if os(iOS) || os(tvOS) || os(watchOS) || targetEnvironment(macCatalyst)
 import UIKit
-#elseif canImport(AppKit)
-import AppKit
-#endif
-
-// MARK: - AnimatedControl
 
 /// Lottie comes prepacked with a two Animated Controls, `AnimatedSwitch` and
 /// `AnimatedButton`. Both of these controls are built on top of `AnimatedControl`
@@ -28,21 +24,21 @@ import AppKit
 /// of its layers.
 ///
 /// NOTE: Do not initialize directly. This is intended to be subclassed.
-open class AnimatedControl: LottieControlType {
+open class AnimatedControl: UIControl {
 
   // MARK: Lifecycle
 
   // MARK: Initializers
 
   public init(
-    animation: LottieAnimation?,
+    animation: LottieAnimation,
     configuration: LottieConfiguration = .shared)
   {
     animationView = LottieAnimationView(
       animation: animation,
       configuration: configuration)
 
-    super.init(frame: animation?.bounds ?? .zero)
+    super.init(frame: animation.bounds)
     commonInit()
   }
 
@@ -68,13 +64,11 @@ open class AnimatedControl: LottieControlType {
     }
   }
 
-  #if canImport(UIKit)
   open override var isSelected: Bool {
     didSet {
       updateForState()
     }
   }
-  #endif
 
   open override var isHighlighted: Bool {
     didSet {
@@ -86,7 +80,6 @@ open class AnimatedControl: LottieControlType {
     animationView.intrinsicContentSize
   }
 
-  #if canImport(UIKit)
   open override func beginTracking(_ touch: UITouch, with event: UIEvent?) -> Bool {
     updateForState()
     return super.beginTracking(touch, with: event)
@@ -107,50 +100,6 @@ open class AnimatedControl: LottieControlType {
     super.cancelTracking(with: event)
   }
 
-  #elseif canImport(AppKit)
-  open override func mouseDown(with mouseDownEvent: NSEvent) {
-    guard let window else { return }
-
-    currentState = .highlighted
-    updateForState()
-    handle(LottieControlEvent(mouseDownEvent.type, inside: eventIsInside(mouseDownEvent)))
-
-    // AppKit mouse-tracking loop from:
-    // https://developer.apple.com/library/archive/documentation/Cocoa/Conceptual/EventOverview/HandlingMouseEvents/HandlingMouseEvents.html#//apple_ref/doc/uid/10000060i-CH6-SW4
-    var keepOn = true
-    while
-      keepOn,
-      let event = window.nextEvent(
-        matching: .any,
-        until: .distantFuture,
-        inMode: .eventTracking,
-        dequeue: true)
-    {
-      if event.type == .leftMouseUp {
-        keepOn = false
-      }
-
-      let isInside = eventIsInside(event)
-      handle(LottieControlEvent(event.type, inside: isInside))
-
-      let expectedState = (isInside && keepOn) ? LottieNSControlState.highlighted : .normal
-      if currentState != expectedState {
-        currentState = expectedState
-        updateForState()
-      }
-    }
-  }
-
-  func handle(_: LottieNSControlEvent) {
-    // To be overridden in subclasses
-  }
-
-  private func eventIsInside(_ event: NSEvent) -> Bool {
-    let mouseLocation = convert(event.locationInWindow, from: nil)
-    return isMousePoint(mouseLocation, in: bounds)
-  }
-  #endif
-
   open func animationDidSet() { }
 
   // MARK: Public
@@ -163,11 +112,7 @@ open class AnimatedControl: LottieControlType {
     didSet {
       animationView.animation = animation
       animationView.bounds = animation?.bounds ?? .zero
-      #if canImport(UIKit)
       setNeedsLayout()
-      #elseif canImport(AppKit)
-      needsLayout = true
-      #endif
       updateForState()
       animationDidSet()
     }
@@ -180,7 +125,7 @@ open class AnimatedControl: LottieControlType {
   }
 
   /// Sets which Animation Layer should be visible for the given state.
-  public func setLayer(named: String, forState: LottieControlState) {
+  public func setLayer(named: String, forState: UIControl.State) {
     stateMap[forState.rawValue] = named
     updateForState()
   }
@@ -194,19 +139,10 @@ open class AnimatedControl: LottieControlType {
 
   var stateMap: [UInt: String] = [:]
 
-  #if canImport(UIKit)
-  var currentState: LottieControlState {
-    state
-  }
-
-  #elseif canImport(AppKit)
-  var currentState = LottieControlState.normal
-  #endif
-
   func updateForState() {
     guard let animationLayer = animationView.animationLayer else { return }
     if
-      let layerName = stateMap[currentState.rawValue],
+      let layerName = stateMap[state.rawValue],
       let stateLayer = animationLayer.layer(for: AnimationKeypath(keypath: layerName))
     {
       for layer in animationLayer._animationLayers {
@@ -223,23 +159,17 @@ open class AnimatedControl: LottieControlType {
   // MARK: Private
 
   private func commonInit() {
-    #if canImport(UIKit)
     animationView.clipsToBounds = false
     clipsToBounds = true
-    #endif
-
     animationView.translatesAutoresizingMaskIntoConstraints = false
     animationView.backgroundBehavior = .forceFinish
     addSubview(animationView)
     animationView.contentMode = .scaleAspectFit
-
-    #if canImport(UIKit)
     animationView.isUserInteractionEnabled = false
-    #endif
-
     animationView.leadingAnchor.constraint(equalTo: leadingAnchor).isActive = true
     animationView.trailingAnchor.constraint(equalTo: trailingAnchor).isActive = true
     animationView.topAnchor.constraint(equalTo: topAnchor).isActive = true
     animationView.bottomAnchor.constraint(equalTo: bottomAnchor).isActive = true
   }
 }
+#endif

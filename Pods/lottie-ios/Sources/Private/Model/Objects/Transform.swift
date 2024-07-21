@@ -5,6 +5,8 @@
 //  Created by Brandon Withrow on 1/7/19.
 //
 
+import Foundation
+
 /// The animatable transform for a layer. Controls position, rotation, scale, and opacity.
 final class Transform: Codable, DictionaryInitializable {
 
@@ -53,25 +55,14 @@ final class Transform: Codable, DictionaryInitializable {
       KeyframeGroup(LottieVector3D(x: Double(100), y: 100, z: 100))
 
     // Rotation
-    if let rotation = try container.decodeIfPresent(KeyframeGroup<LottieVector1D>.self, forKey: .rotationX) {
-      rotationX = rotation
+    if let rotationZ = try container.decodeIfPresent(KeyframeGroup<LottieVector1D>.self, forKey: .rotationZ) {
+      rotation = rotationZ
     } else {
-      rotationX = KeyframeGroup(LottieVector1D(0))
-    }
-
-    if let rotation = try container.decodeIfPresent(KeyframeGroup<LottieVector1D>.self, forKey: .rotationY) {
-      rotationY = rotation
-    } else {
-      rotationY = KeyframeGroup(LottieVector1D(0))
-    }
-
-    if let rotation = try container.decodeIfPresent(KeyframeGroup<LottieVector1D>.self, forKey: .rotationZ) {
-      rotationZ = rotation
-    } else {
-      rotationZ = try container
+      rotation = try container
         .decodeIfPresent(KeyframeGroup<LottieVector1D>.self, forKey: .rotation) ?? KeyframeGroup(LottieVector1D(0))
     }
-    rotation = nil
+    rotationZ = nil
+
     // Opacity
     opacity = try container
       .decodeIfPresent(KeyframeGroup<LottieVector1D>.self, forKey: .opacity) ?? KeyframeGroup(LottieVector1D(100))
@@ -84,7 +75,7 @@ final class Transform: Codable, DictionaryInitializable {
     {
       self.anchorPoint = anchorPoint
     } else {
-      anchorPoint = Transform.default.anchorPoint
+      anchorPoint = KeyframeGroup(LottieVector3D(x: Double(0), y: 0, z: 0))
     }
 
     if
@@ -110,7 +101,7 @@ final class Transform: Codable, DictionaryInitializable {
       positionY = try KeyframeGroup<LottieVector1D>(dictionary: yDictionary)
       position = nil
     } else {
-      position = Transform.default.position
+      position = KeyframeGroup(LottieVector3D(x: Double(0), y: 0, z: 0))
       positionX = nil
       positionY = nil
     }
@@ -121,73 +112,30 @@ final class Transform: Codable, DictionaryInitializable {
     {
       self.scale = scale
     } else {
-      scale = Transform.default.scale
+      scale = KeyframeGroup(LottieVector3D(x: Double(100), y: 100, z: 100))
     }
-
     if
-      let rotationDictionary = dictionary[CodingKeys.rotationX.rawValue] as? [String: Any],
-      let rotation = try? KeyframeGroup<LottieVector1D>(dictionary: rotationDictionary)
-    {
-      rotationX = rotation
-    } else {
-      rotationX = Transform.default.rotationX
-    }
-
-    if
-      let rotationDictionary = dictionary[CodingKeys.rotationY.rawValue] as? [String: Any],
-      let rotation = try? KeyframeGroup<LottieVector1D>(dictionary: rotationDictionary)
-    {
-      rotationY = rotation
-    } else {
-      rotationY = Transform.default.rotationY
-    }
-
-    if
-      let rotationDictionary = dictionary[CodingKeys.rotation.rawValue] as? [String: Any],
-      let rotation = try? KeyframeGroup<LottieVector1D>(dictionary: rotationDictionary)
-    {
-      rotationZ = rotation
-    } else if
       let rotationDictionary = dictionary[CodingKeys.rotationZ.rawValue] as? [String: Any],
       let rotation = try? KeyframeGroup<LottieVector1D>(dictionary: rotationDictionary)
     {
-      rotationZ = rotation
+      self.rotation = rotation
+    } else if
+      let rotationDictionary = dictionary[CodingKeys.rotation.rawValue] as? [String: Any],
+      let rotation = try? KeyframeGroup<LottieVector1D>(dictionary: rotationDictionary)
+    {
+      self.rotation = rotation
     } else {
-      rotationZ = Transform.default.rotationZ
+      rotation = KeyframeGroup(LottieVector1D(0))
     }
-    rotation = nil
+    rotationZ = nil
     if
       let opacityDictionary = dictionary[CodingKeys.opacity.rawValue] as? [String: Any],
       let opacity = try? KeyframeGroup<LottieVector1D>(dictionary: opacityDictionary)
     {
       self.opacity = opacity
     } else {
-      opacity = Transform.default.opacity
+      opacity = KeyframeGroup(LottieVector1D(100))
     }
-  }
-
-  init(
-    anchorPoint: KeyframeGroup<LottieVector3D>,
-    position: KeyframeGroup<LottieVector3D>?,
-    positionX: KeyframeGroup<LottieVector1D>?,
-    positionY: KeyframeGroup<LottieVector1D>?,
-    scale: KeyframeGroup<LottieVector3D>,
-    rotationX: KeyframeGroup<LottieVector1D>,
-    rotationY: KeyframeGroup<LottieVector1D>,
-    rotationZ: KeyframeGroup<LottieVector1D>,
-    opacity: KeyframeGroup<LottieVector1D>,
-    rotation: KeyframeGroup<LottieVector1D>?)
-  {
-    self.anchorPoint = anchorPoint
-    self.position = position
-    self.positionX = positionX
-    self.positionY = positionY
-    self.scale = scale
-    self.rotationX = rotationX
-    self.rotationY = rotationY
-    self.rotationZ = rotationZ
-    self.opacity = opacity
-    self.rotation = rotation
   }
 
   // MARK: Internal
@@ -199,8 +147,6 @@ final class Transform: Codable, DictionaryInitializable {
     case positionY = "py"
     case scale = "s"
     case rotation = "r"
-    case rotationX = "rx"
-    case rotationY = "ry"
     case rotationZ = "rz"
     case opacity = "o"
   }
@@ -209,21 +155,6 @@ final class Transform: Codable, DictionaryInitializable {
     case split = "s"
     case positionX = "x"
     case positionY = "y"
-  }
-
-  /// Default transform values to use if no transform is provided
-  static var `default`: Transform {
-    Transform(
-      anchorPoint: KeyframeGroup(LottieVector3D(x: Double(0), y: 0, z: 0)),
-      position: KeyframeGroup(LottieVector3D(x: Double(0), y: 0, z: 0)),
-      positionX: nil,
-      positionY: nil,
-      scale: KeyframeGroup(LottieVector3D(x: Double(100), y: 100, z: 100)),
-      rotationX: KeyframeGroup(LottieVector1D(0)),
-      rotationY: KeyframeGroup(LottieVector1D(0)),
-      rotationZ: KeyframeGroup(LottieVector1D(0)),
-      opacity: KeyframeGroup(LottieVector1D(100)),
-      rotation: nil)
   }
 
   /// The anchor point of the transform.
@@ -238,23 +169,15 @@ final class Transform: Codable, DictionaryInitializable {
   /// The positionY of the transform. This is nil if the position property is set.
   let positionY: KeyframeGroup<LottieVector1D>?
 
-  /// The scale of the transform.
+  /// The scale of the transform
   let scale: KeyframeGroup<LottieVector3D>
 
-  /// The rotation of the transform on X axis.
-  let rotationX: KeyframeGroup<LottieVector1D>
-
-  /// The rotation of the transform on Y axis.
-  let rotationY: KeyframeGroup<LottieVector1D>
-
-  /// The rotation of the transform on Z axis.
-  let rotationZ: KeyframeGroup<LottieVector1D>
+  /// The rotation of the transform. Note: This is single dimensional rotation.
+  let rotation: KeyframeGroup<LottieVector1D>
 
   /// The opacity of the transform.
   let opacity: KeyframeGroup<LottieVector1D>
 
-  // MARK: Private
-
-  /// Here for the CodingKeys.rotation = "r". `r` and `rz` are the same.
-  private let rotation: KeyframeGroup<LottieVector1D>?
+  /// Should always be nil.
+  let rotationZ: KeyframeGroup<LottieVector1D>?
 }
